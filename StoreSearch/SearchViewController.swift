@@ -56,23 +56,41 @@ extension SearchViewController: UISearchBarDelegate {
             tableView.reloadData()
             hasSearched = true
             searchResults = []
-            
-            let queue = DispatchQueue.global()
-            let url = self.iTunesURL(searchText: searchBar.text!)
-            
-            
-            queue.async {
-                if let data = self.performStoreRequest(with: url) {
-                    self.searchResults = self.parse(data: data)
-                    self.searchResults.sort(by: <)
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        self.tableView.reloadData()
-                    }
+            // 1
+            let url = iTunesURL(searchText: searchBar.text!)
+            // 2
+            let session = URLSession.shared
+            // 3
+            let dataTask = session.dataTask(with: url) {
+                data, response,
+                error in
+                // 4
+                if let error = error {
+                    print("Failure! \(error.localizedDescription)")
+                } else if let httpResponse = response as? HTTPURLResponse,
+                          httpResponse.statusCode == 200 {
+                    if let data = data {
+                        self.searchResults = self.parse(data: data)
+                        self.searchResults.sort(by: <)
+                        DispatchQueue.main.async {
+                            self.isLoading = false
+                            self.tableView.reloadData()
+                        }
                     return
+                    }
+                } else {
+                    print("Failure! \(response!)")
+                }
+                
+                DispatchQueue.main.async {
+                    self.hasSearched = false
+                    self.hasSearched = false
+                    self.tableView.reloadData()
+                    self.showNetworkError()
                 }
             }
-           
+            // 5
+            dataTask.resume()
         }
         
     }
@@ -91,15 +109,7 @@ extension SearchViewController: UISearchBarDelegate {
         return url!
     }
     
-    func performStoreRequest(with url: URL) -> Data? {
-        do {
-            return try Data(contentsOf: url)
-        } catch {
-            print("Download Error: \(error.localizedDescription)")
-            showNetworkError()
-            return nil
-        }
-    }
+    
     
     func parse(data: Data) -> [SearchResult] {
         do {
