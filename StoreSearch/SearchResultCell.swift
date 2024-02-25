@@ -35,7 +35,7 @@ class SearchResultCell: UITableViewCell {
         if result.artist.isEmpty {
             artistNameLabel.text = "Unknown"
         } else {
-            artistNameLabel.text = String(format: "@ (@)",
+            artistNameLabel.text = String(format: "%@ (%@)",
                                           result.artist, result.type)
         }
         artworkImageView.image = UIImage(systemName: "square")
