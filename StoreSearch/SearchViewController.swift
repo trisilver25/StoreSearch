@@ -163,26 +163,17 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             let spinner = cell.viewWithTag(100) as! UIActivityIndicatorView
             spinner.startAnimating()
             return cell
-        } else
-        
-        if searchResults.count == 0 {
+        } else if searchResults.count == 0 {
             return tableView.dequeueReusableCell(withIdentifier: TableView.CellIdentifiers.nothingFoundCell, for: indexPath)
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableView.CellIdentifiers.searchResultCell, for: indexPath) as! SearchResultCell
             
             let searchResult = searchResults[indexPath.row]
-            cell.nameLabel.text = searchResult.name
-            if searchResult.artist.isEmpty {
-                cell.artistNameLabel.text = "Unknown"
-            } else {
-                cell.artistNameLabel.text = String(
-                    format: "%@ (%@)",
-                    searchResult.artist,
-                    searchResult.type)
-            }
+            cell.configure(for: searchResult)
             return cell
         }
     }
+    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -207,5 +198,6 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
+    
 }
-
